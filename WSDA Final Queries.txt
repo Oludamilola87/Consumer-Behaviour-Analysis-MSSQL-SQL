@@ -1,0 +1,123 @@
+--CREATED BY: OLUDAMILOLA OYETOSHO
+--DATE: 05/11/2023
+--Extract Data from WDMusic Database 
+
+
+--How many customers purchased exactly two songs, and each song is priced at $0.99?
+
+SELECT
+  CustomerId,
+  InvoiceDate,
+  BillingAddress,
+  BillingCity,
+  round((total),2) as Total
+FROM 
+  [WDMusic].[dbo].[Invoice]  
+WHERE
+  Total = 1.98
+ORDER BY
+  InvoiceDate
+
+--What is the number of customers whose total purchase value falls within the range of $1.98 to $3?
+
+SELECT
+  CustomerId,
+  InvoiceDate,
+  BillingAddress,
+  BillingCity,
+  round((total),2) as Total
+FROM 
+  [WDMusic].[dbo].[Invoice]  
+WHERE
+  Total BETWEEN 1.98 AND 3
+ORDER BY
+  InvoiceDate
+
+--List of invoices billed in the cities of Brussels Orlando and Paris?
+
+SELECT
+  CustomerId,
+  InvoiceDate,
+  BillingAddress,
+  BillingCity,
+  round((total),2) Total
+FROM 
+  [WDMusic].[dbo].[Invoice]  
+WHERE
+    BillingCity IN ('Brussels','Orlando','Paris')
+ORDER BY 4 DESC
+  
+--What is the number of sales in billing cities whose city starts with P or D and their total music purchase is > 1.98?
+
+SELECT
+  CustomerId,
+  InvoiceDate,
+  BillingAddress,
+  BillingCity,
+  total
+FROM
+  [WDMusic].[dbo].[Invoice] 
+WHERE
+  (BillingCity  LIKE 'P%' OR BillingCity LIKE 'D%') AND Total>1.98
+ORDER BY
+  BillingCity
+
+--Number of customers whose spending is between $7 and $18 when purchasing music from their online store?
+-- SALES CATEGORIES:EXTREMELY LOW - BETWEEN 0.99 AND 1.99,LOW 2.00 AND 6.99, MET TARGET 7.00 AND 15.00,EXCEEDED TARGET ABOVE 15
+
+SELECT
+  CustomerId,
+  InvoiceDate,
+  BillingAddress,
+  BillingCity,
+  total,
+  CASE
+  WHEN TOTAL<2.00 THEN 'Extremely Low'
+  WHEN total<6.99 THEN 'Low'
+  WHEN total<15 THEN 'Met Target'
+  ELSE 'Exceeded Target'
+  END AS 'Purchase Type'
+FROM
+  Invoice  
+WHERE
+  TOTAL >1.98 AND (BillingCity like 'P%' OR BillingCity like 'D%')
+ORDER BY
+  BillingCity
+
+--What is the sales performance for each billing city compared to global average sales?
+
+SELECT
+  BillingCity,
+  BillingCountry,
+  round(avg(total),2) Total
+FROM
+  [WDMusic].[dbo].[Invoice]
+WHERE
+  total<(SELECT round(avg(total),2) FROM INVOICE)
+GROUP BY
+  BillingCountry,BillingCity
+ORDER BY
+  BillingCountry
+
+--Create Store procedure for repetitive invoices?
+
+CREATE PROCEDURE TEMP_INVOICE
+AS
+SELECT
+ InvoiceDate,
+ BillingAddress,
+ BillingCity
+FROM
+ [WDMusic].[dbo].[Invoice]
+WHERE
+ InvoiceDate IN
+(SELECT
+InvoiceDate
+FROM
+Invoice
+WHERE
+InvoiceId IN (251, 252,254))
+
+
+
+
